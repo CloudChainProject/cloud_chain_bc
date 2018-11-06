@@ -115,9 +115,7 @@ const BrewNode = function(port){
     }
 
     const getBlocksTeamMember = (teamMember) => {
-        return {
-            blocks: chain.getTotalBlocksTeamMember(teamMember)
-        }
+        return chain.getTotalBlocksTeamMember(teamMember)
     }
 
     const addPeer = (host, port) => {
