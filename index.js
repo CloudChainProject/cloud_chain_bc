@@ -3,6 +3,7 @@ const fs =require('fs-extra');
 const express = require('express');
 const BrewNode = require('./cloudNode');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const port = 18070+Math.floor(Math.random()*30);
 console.log('starting node on ', port)
@@ -14,8 +15,11 @@ const http_port = 3008; //+Math.floor(Math.random()*10);
 
 let BrewHTTP = function (){
 	const app = new express();
+	app.use(cors());
 
-	app.use(bodyParser.json());
+	app.use(bodyParser.json({limit: '1000mb', extended: true}))
+	app.use(bodyParser.urlencoded({limit: '1000mb', extended: true}))
+
 	app.use(express.static(path.join(__dirname, 'public')));
 
 	app.get('/addNode/:port', (req, res)=>{

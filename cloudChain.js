@@ -85,7 +85,7 @@ const BrewChain = function() {
 
 	const checkNewBlockIsValid = (block, previousBlock) => {
 		if(previousBlock.index + 1 !== block.index) return false;
-		else if (previousBlock.hash !== block.previousHash return false;
+		else if (previousBlock.hash !== block.previousHash) return false;
 		else if(!hashIsValid(block)) return false;
 		return true;
 	}
@@ -127,22 +127,21 @@ const BrewChain = function() {
 			const form = new formidable.IncomingForm();
 			form.uploadDir = `./files/${teammember}/`;
 			form.keepExtensions = true;
-
-			return form.parse(req, function(err, fields, files) {
-				data.size = files.img_avatar.size;
-				data.path = files.img_avatar.path;
-				data.name = files.img_avatar.name;
-				data.type = files.img_avatar.type;
-				data.lastModifiedDate = files.img_avatar.lastModifiedDate;
+			return form.parse(req, async (err, fields, files) => {
+				data.size = files.data.size;
+				data.path = files.data.path;
+				data.name = files.data.name;
+				data.type = files.data.type;
+				data.lastModifiedDate = files.data.lastModifiedDate;
 
 				var algorithm = 'sha1', shasum = Crypto.createHash(algorithm)
 
 				var filename = __dirname + `/${data.path}`, s = fs.ReadStream(filename)
-				s.on('data', function(data) {
+				s.on('data', (data) => {
 					shasum.update(data)
 				})
 
-				s.on('end', function() {
+				s.on('end', async () => {
 					data.file_hash = shasum.digest('hex')
 
 					newBlock = {
@@ -155,11 +154,18 @@ const BrewChain = function() {
 					};
 					newBlock = proofOfWork(newBlock);
 					fs.writeFile(`./blocks/${newBlock.timestamp}.json`, JSON.stringify(newBlock), 'utf8', ()=>{	});
+					await cryptoFile.encrypt(`./files/${teammember}/` + filename.slice(filename.lastIndexOf('/') +1 , filename.length), 'your-awsome-pwd');
+					//TODO password
 					console.log('block created');
+					_deleteFiles(filename)
 					return resolve(newBlock)
 				})
 			});
 		})
+	}
+
+	const _deleteFiles = async (path)=>{
+		fs.unlink(path, function(err, data) {})
 	}
 
 	return {
